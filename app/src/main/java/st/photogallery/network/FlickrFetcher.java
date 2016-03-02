@@ -3,11 +3,20 @@ package st.photogallery.network;
 import android.net.Uri;
 import android.util.Log;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import st.photogallery.model.GalleryItem;
 
 /**
  * Created by tengsun on 3/1/16.
@@ -21,6 +30,8 @@ public class FlickrFetcher {
     private static final String METHOD_GET_RECENT = "flickr.photos.getRecent";
     private static final String PARAM_EXTRAS = "extras";
     private static final String EXTRA_SMALL_URL = "url_s";
+
+    private static final String XML_PHOTO = "photo";
 
     byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
@@ -54,7 +65,9 @@ public class FlickrFetcher {
         return new String(getUrlBytes(urlSepc));
     }
 
-    public void fetchItems() {
+    public List<GalleryItem> fetchItems() {
+        List<GalleryItem> items = new ArrayList<GalleryItem>();
+
         try {
             String url = Uri.parse(ENDPOINT).buildUpon()
                     .appendQueryParameter("method", METHOD_GET_RECENT)
@@ -64,8 +77,34 @@ public class FlickrFetcher {
             Log.i(TAG, "Sending request to url: " + url);
             String xmlString = getUrl(url);
             Log.i(TAG, "Received xml: " + xmlString);
+
+            XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+            parser.setInput(new StringReader(xmlString));
+            parseItems(items, parser);
+            Log.i(TAG, "Total photo items: " + items.size());
         } catch (IOException e) {
             Log.e(TAG, "Failed to fetch items", e);
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "Failed to parse items", e);
+        }
+
+        return items;
+    }
+
+    void parseItems(List<GalleryItem> items, XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        int eventType = parser.next();
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG && XML_PHOTO.equals(parser.getName())) {
+                String id = parser.getAttributeValue(null, "id");
+                String caption = parser.getAttributeValue(null, "title");
+                String smallUrl = parser.getAttributeValue(null, EXTRA_SMALL_URL);
+                GalleryItem item = new GalleryItem(id, caption, smallUrl);
+                items.add(item);
+            }
+
+            eventType = parser.next();
         }
     }
 

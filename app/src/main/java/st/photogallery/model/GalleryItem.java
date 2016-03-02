@@ -5,9 +5,15 @@ package st.photogallery.model;
  */
 public class GalleryItem {
 
-    private String caption;
     private String id;
+    private String caption;
     private String url;
+
+    public GalleryItem(String id, String caption, String url) {
+        this.id = id;
+        this.caption = caption;
+        this.url = url;
+    }
 
     public String getCaption() {
         return caption;
