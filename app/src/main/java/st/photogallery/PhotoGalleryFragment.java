@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,18 +35,25 @@ public class PhotoGalleryFragment extends Fragment {
     private List<GalleryItem> items;
     private ThumbnailDownloader<ImageView> thumbnailDownloader;
 
+    private LruCache<String, Bitmap> lruCache;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         new FetchItemTask().execute();
 
+        lruCache = new LruCache<String, Bitmap>(100);
+
         thumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
         thumbnailDownloader.setListener(new ThumbnailDownloader.Listener<ImageView>() {
             @Override
-            public void onThumbnailDownloaded(ImageView imageView, Bitmap thumbnail) {
+            public void onThumbnailDownloaded(ImageView imageView, String id, Bitmap thumbnail) {
                 if (isVisible()) {
                     imageView.setImageBitmap(thumbnail);
+
+                    // save into cache
+                    lruCache.put(id, thumbnail);
                 }
             }
         });
@@ -116,7 +124,14 @@ public class PhotoGalleryFragment extends Fragment {
             imageView.setImageResource(R.drawable.placeholder);
 
             GalleryItem item = getItem(position);
-            thumbnailDownloader.queueThumbnail(imageView, item.getUrl());
+
+            // check in cache
+            Bitmap cacheImage = lruCache.get(item.getId());
+            if (cacheImage == null) {
+                thumbnailDownloader.queueThumbnail(imageView, item);
+            } else {
+                imageView.setImageBitmap(cacheImage);
+            }
 
             return convertView;
         }

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import st.photogallery.model.GalleryItem;
 import st.photogallery.network.FlickrFetcher;
 
 /**
@@ -24,13 +25,13 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
     private static final int MESSAGE_DOWNLOAD = 0;
 
     private Handler requestHandler;
-    private Map<Token, String> requestMap =
-            Collections.synchronizedMap(new HashMap<Token, String>());
+    private Map<Token, GalleryItem> requestMap =
+            Collections.synchronizedMap(new HashMap<Token, GalleryItem>());
     private Handler responseHandler;
     private Listener<Token> listener;
 
     public interface Listener<Token> {
-        void onThumbnailDownloaded(Token token, Bitmap thumbnail);
+        void onThumbnailDownloaded(Token token, String id, Bitmap thumbnail);
     }
 
     public void setListener(Listener<Token> listener) {
@@ -42,9 +43,9 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
         this.responseHandler = responseHandler;
     }
 
-    public void queueThumbnail(Token token, String url) {
-        Log.i(TAG, "Got an URL: " + url);
-        requestMap.put(token, url);
+    public void queueThumbnail(Token token, GalleryItem item) {
+        Log.i(TAG, "Got an URL: " + item.getUrl());
+        requestMap.put(token, item);
 
         requestHandler.obtainMessage(MESSAGE_DOWNLOAD, token).sendToTarget();
     }
@@ -57,7 +58,7 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
             public void handleMessage(Message msg) {
                 if (msg.what == MESSAGE_DOWNLOAD) {
                     Token token = (Token) msg.obj;
-                    Log.i(TAG, "Got a request for url: " + requestMap.get(token));
+                    Log.i(TAG, "Got a request for item: " + requestMap.get(token));
                     handleRequest(token);
                 }
             }
@@ -66,12 +67,12 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 
     private void handleRequest(final Token token) {
         try {
-            final String url = requestMap.get(token);
-            if (url == null) {
+            final GalleryItem item = requestMap.get(token);
+            if (item == null) {
                 return;
             }
 
-            byte[] bitmapBytes = new FlickrFetcher().getUrlBytes(url);
+            byte[] bitmapBytes = new FlickrFetcher().getUrlBytes(item.getUrl());
             final Bitmap bitmap =
                     BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
             Log.i(TAG, "Bitmap created");
@@ -80,12 +81,12 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
             responseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (requestMap.get(token) != url) {
+                    if (requestMap.get(token) != item) {
                         return;
                     }
 
                     requestMap.remove(token);
-                    listener.onThumbnailDownloaded(token, bitmap);
+                    listener.onThumbnailDownloaded(token, item.getId(), bitmap);
                 }
             });
         } catch (IOException e) {
