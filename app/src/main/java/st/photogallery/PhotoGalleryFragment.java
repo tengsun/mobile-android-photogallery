@@ -19,6 +19,7 @@ import java.util.List;
 
 import st.photogallery.model.GalleryItem;
 import st.photogallery.network.FlickrFetcher;
+import st.photogallery.thread.ThumbnailDownloader;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,12 +30,18 @@ public class PhotoGalleryFragment extends Fragment {
 
     private GridView gridView;
     private List<GalleryItem> items;
+    private ThumbnailDownloader<ImageView> thumbnailDownloader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         new FetchItemTask().execute();
+
+        thumbnailDownloader = new ThumbnailDownloader<ImageView>();
+        thumbnailDownloader.start();
+        thumbnailDownloader.getLooper();
+        Log.i(TAG, "Background thread thumbnail downloader started");
     }
 
     @Override
@@ -44,6 +51,13 @@ public class PhotoGalleryFragment extends Fragment {
         gridView = (GridView) view.findViewById(R.id.photo_gallery_grid_view);
         setupAdapter();
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        thumbnailDownloader.quit();
+        Log.i(TAG, "Background thread thumbnail downloader destroyed");
     }
 
     void setupAdapter() {
@@ -84,6 +98,10 @@ public class PhotoGalleryFragment extends Fragment {
             ImageView imageView = (ImageView) convertView
                     .findViewById(R.id.photo_gallery_image_view);
             imageView.setImageResource(R.drawable.placeholder);
+
+            GalleryItem item = getItem(position);
+            thumbnailDownloader.queueThumbnail(imageView, item.getUrl());
+
             return convertView;
         }
     }
