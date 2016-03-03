@@ -1,5 +1,6 @@
 package st.photogallery.thread;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -10,7 +11,6 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import st.photogallery.network.FlickrFetcher;
@@ -23,7 +23,7 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
     private static final String TAG = "ThumbnailDownloader";
     private static final int MESSAGE_DOWNLOAD = 0;
 
-    private Handler handler;
+    private Handler requestHandler;
     private Map<Token, String> requestMap =
             Collections.synchronizedMap(new HashMap<Token, String>());
     private Handler responseHandler;
@@ -42,9 +42,17 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
         this.responseHandler = responseHandler;
     }
 
+    public void queueThumbnail(Token token, String url) {
+        Log.i(TAG, "Got an URL: " + url);
+        requestMap.put(token, url);
+
+        requestHandler.obtainMessage(MESSAGE_DOWNLOAD, token).sendToTarget();
+    }
+
+    @SuppressLint("HandlerLeak")
     @Override
     protected void onLooperPrepared() {
-        handler = new Handler() {
+        requestHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MESSAGE_DOWNLOAD) {
@@ -85,15 +93,8 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
         }
     }
 
-    public void queueThumbnail(Token token, String url) {
-        Log.i(TAG, "Got an URL: " + url);
-        requestMap.put(token, url);
-
-        handler.obtainMessage(MESSAGE_DOWNLOAD, token).sendToTarget();
-    }
-
     public void clearQueue() {
-        handler.removeMessages(MESSAGE_DOWNLOAD);
+        requestHandler.removeMessages(MESSAGE_DOWNLOAD);
         requestMap.clear();
     }
 
