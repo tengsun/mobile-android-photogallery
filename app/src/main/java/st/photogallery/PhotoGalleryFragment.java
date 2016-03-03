@@ -1,6 +1,7 @@
 package st.photogallery;
 
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -48,8 +50,7 @@ public class PhotoGalleryFragment extends Fragment {
         if (getActivity() == null || gridView == null) return;
 
         if (items != null) {
-            gridView.setAdapter(new ArrayAdapter<GalleryItem>(getActivity(),
-                    android.R.layout.simple_gallery_item, items));
+            gridView.setAdapter(new GalleryItemAdapter(items));
         } else {
             gridView.setAdapter(null);
         }
@@ -65,6 +66,25 @@ public class PhotoGalleryFragment extends Fragment {
         protected void onPostExecute(List<GalleryItem> galleryItems) {
             items = galleryItems;
             setupAdapter();
+        }
+    }
+
+    private class GalleryItemAdapter extends ArrayAdapter<GalleryItem> {
+
+        public GalleryItemAdapter(List<GalleryItem> items) {
+            super(getActivity(), 0, items);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getActivity().getLayoutInflater()
+                        .inflate(R.layout.gallery_item, parent, false);
+            }
+            ImageView imageView = (ImageView) convertView
+                    .findViewById(R.id.photo_gallery_image_view);
+            imageView.setImageResource(R.drawable.placeholder);
+            return convertView;
         }
     }
 
