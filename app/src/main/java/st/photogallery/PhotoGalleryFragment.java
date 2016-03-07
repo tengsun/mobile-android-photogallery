@@ -6,6 +6,7 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import java.util.List;
 
 import st.photogallery.model.GalleryItem;
 import st.photogallery.network.FlickrFetcher;
+import st.photogallery.service.PollService;
 import st.photogallery.thread.ThumbnailDownloader;
 
 /**
@@ -52,6 +54,9 @@ public class PhotoGalleryFragment extends Fragment {
         setHasOptionsMenu(true);
 
         updateItems();
+
+        Intent intent = new Intent(getActivity(), PollService.class);
+        getActivity().startService(intent);
 
         lruCache = new LruCache<String, Bitmap>(100);
 
