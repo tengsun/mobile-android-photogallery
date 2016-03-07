@@ -55,9 +55,6 @@ public class PhotoGalleryFragment extends Fragment {
 
         updateItems();
 
-        Intent intent = new Intent(getActivity(), PollService.class);
-        getActivity().startService(intent);
-
         lruCache = new LruCache<String, Bitmap>(100);
 
         thumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
@@ -114,6 +111,10 @@ public class PhotoGalleryFragment extends Fragment {
                 PreferenceManager.getDefaultSharedPreferences(getActivity())
                         .edit().putString(FlickrFetcher.PREF_SEARCH_QUERY, null).commit();
                 updateItems();
+                return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

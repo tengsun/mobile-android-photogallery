@@ -1,6 +1,8 @@
 package st.photogallery.service;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +21,7 @@ import st.photogallery.network.FlickrFetcher;
 public class PollService extends IntentService {
 
     private static final String TAG = "PollService";
+    private static final int POLL_INTERNAL = 1000 * 15;
 
     public PollService() {
         super(TAG);
@@ -63,4 +66,31 @@ public class PollService extends IntentService {
 
         prefs.edit().putString(FlickrFetcher.PREF_LAST_RESULT_ID, resultId).commit();
     }
+
+    public static void setServiceAlarm(Context context, boolean shouldStart) {
+        Intent intent = new Intent(context, PollService.class);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+
+        AlarmManager alarmManager = (AlarmManager)
+                context.getSystemService(Context.ALARM_SERVICE);
+        if (shouldStart) {
+            alarmManager.setRepeating(AlarmManager.RTC,
+                    System.currentTimeMillis(), POLL_INTERNAL, pi);
+        } else {
+            alarmManager.cancel(pi);
+            pi.cancel();
+        }
+    }
+
+    public static boolean isServiceAlarmOn(Context context) {
+        Intent intent = new Intent(context, PollService.class);
+        PendingIntent pi =
+                PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        if (pi != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
