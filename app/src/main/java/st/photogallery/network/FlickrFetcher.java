@@ -75,7 +75,7 @@ public class FlickrFetcher {
         try {
             Log.i(TAG, "Sending request to url: " + url);
             String xmlString = getUrl(url);
-            Log.i(TAG, "Received xml: " + xmlString);
+            // Log.i(TAG, "Received xml: " + xmlString);
 
             XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
             parser.setInput(new StringReader(xmlString));
