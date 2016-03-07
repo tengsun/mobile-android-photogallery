@@ -2,16 +2,22 @@ package st.photogallery.service;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.List;
 
+import st.photogallery.PhotoGalleryActivity;
+import st.photogallery.R;
 import st.photogallery.model.GalleryItem;
 import st.photogallery.network.FlickrFetcher;
 
@@ -60,6 +66,23 @@ public class PollService extends IntentService {
         String resultId = items.get(0).getId();
         if (!resultId.equals(lastResultId)) {
             Log.i(TAG, "Got a new result: " + resultId);
+
+            // send a notification
+            Resources resources = getResources();
+            PendingIntent pi = PendingIntent
+                    .getService(this, 0, new Intent(this, PhotoGalleryActivity.class), 0);
+
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setTicker(resources.getString(R.string.new_pictures_title))
+                    .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                    .setContentTitle(resources.getString(R.string.new_pictures_title))
+                    .setContentText(resources.getString(R.string.new_pictures_text))
+                    .setContentIntent(pi)
+                    .setAutoCancel(true)
+                    .build();
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(0, notification);
         } else {
             Log.i(TAG, "Got an old result: " + resultId);
         }
