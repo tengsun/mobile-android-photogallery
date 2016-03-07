@@ -4,9 +4,10 @@
     <item android:id="@+id/menu_item_search"
         android:title="@string/search"
         android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="ifRoom" />
-    <item android:id="@+id/menu_item_clear"
-        android:title="@string/clear"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        app:showAsAction="ifRoom"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
+    <item android:id="@+id/menu_item_refresh"
+        android:title="@string/refresh"
+        android:icon="@android:drawable/ic_menu_rotate"
         app:showAsAction="ifRoom" />
 </menu>
