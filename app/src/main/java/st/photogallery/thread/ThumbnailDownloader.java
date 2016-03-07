@@ -75,7 +75,7 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
             byte[] bitmapBytes = new FlickrFetcher().getUrlBytes(item.getUrl());
             final Bitmap bitmap =
                     BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
-            Log.i(TAG, "Bitmap created");
+            // Log.i(TAG, "Bitmap created");
 
             // response handler process image
             responseHandler.post(new Runnable() {

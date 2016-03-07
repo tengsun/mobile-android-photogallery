@@ -25,6 +25,7 @@ public class FlickrFetcher {
 
     private static final String TAG = "FlickrFetcher";
     public static final String PREF_SEARCH_QUERY = "searchQuery";
+    public static final String PREF_LAST_RESULT_ID = "lastResultId";
 
     private static final String ENDPOINT = "https://api.flickr.com/services/rest/";
     private static final String API_KEY = "d0fbb2909f7d2108ad63eae5e28ab4f4";
