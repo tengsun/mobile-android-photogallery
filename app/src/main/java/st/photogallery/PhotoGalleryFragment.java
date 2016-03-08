@@ -36,7 +36,7 @@ import st.photogallery.network.ThumbnailDownloader;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
 
     private static final String TAG = "PhotoGalleryFragment";
 

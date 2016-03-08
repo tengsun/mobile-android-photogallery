@@ -28,7 +28,10 @@ public class PollService extends IntentService {
 
     private static final String TAG = "PollService";
     private static final int POLL_INTERNAL = 1000 * 15;
+
     public static final String PREF_IS_ALARM_ON = "isAlarmOn";
+    public static final String ACTION_SHOW_NOTIFICATION =
+            "st.photogallery.SHOW_NOTIFICATION";
 
     public PollService() {
         super(TAG);
@@ -84,6 +87,9 @@ public class PollService extends IntentService {
             NotificationManager notificationManager = (NotificationManager)
                     getSystemService(NOTIFICATION_SERVICE);
             notificationManager.notify(0, notification);
+
+            // send a broadcast
+            sendBroadcast(new Intent(ACTION_SHOW_NOTIFICATION));
         } else {
             Log.i(TAG, "Got an old result: " + resultId);
         }
