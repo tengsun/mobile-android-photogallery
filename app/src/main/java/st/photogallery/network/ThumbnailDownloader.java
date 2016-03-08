@@ -1,4 +1,4 @@
-package st.photogallery.thread;
+package st.photogallery.network;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;

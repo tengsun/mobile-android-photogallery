@@ -6,7 +6,6 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,7 +31,7 @@ import java.util.List;
 import st.photogallery.model.GalleryItem;
 import st.photogallery.network.FlickrFetcher;
 import st.photogallery.service.PollService;
-import st.photogallery.thread.ThumbnailDownloader;
+import st.photogallery.network.ThumbnailDownloader;
 
 /**
  * A simple {@link Fragment} subclass.
