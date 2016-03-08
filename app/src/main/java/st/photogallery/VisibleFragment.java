@@ -28,7 +28,8 @@ public class VisibleFragment extends Fragment {
     public void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter(PollService.ACTION_SHOW_NOTIFICATION);
-        getActivity().registerReceiver(onShowNotification, filter);
+        getActivity().registerReceiver(onShowNotification, filter,
+                PollService.PERM_PRIVATE, null);
     }
 
     @Override
