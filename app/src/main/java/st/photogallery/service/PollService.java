@@ -1,5 +1,6 @@
 package st.photogallery.service;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -86,17 +87,27 @@ public class PollService extends IntentService {
                     .setContentIntent(pi)
                     .setAutoCancel(true)
                     .build();
-            NotificationManager notificationManager = (NotificationManager)
-                    getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(0, notification);
+//            NotificationManager notificationManager = (NotificationManager)
+//                    getSystemService(NOTIFICATION_SERVICE);
+//            notificationManager.notify(0, notification);
 
             // send a broadcast
-            sendBroadcast(new Intent(ACTION_SHOW_NOTIFICATION), PERM_PRIVATE);
+//            sendBroadcast(new Intent(ACTION_SHOW_NOTIFICATION), PERM_PRIVATE);
+
+            showBackgroundNotification(0, notification);
         } else {
             Log.i(TAG, "Got an old result: " + resultId);
         }
 
         prefs.edit().putString(FlickrFetcher.PREF_LAST_RESULT_ID, resultId).commit();
+    }
+
+    void showBackgroundNotification(int requestCode, Notification notification) {
+        Intent intent = new Intent(ACTION_SHOW_NOTIFICATION);
+        intent.putExtra("REQUEST_CODE", requestCode);
+        intent.putExtra("NOTIFICATION", notification);
+        sendOrderedBroadcast(intent, PERM_PRIVATE, null, null,
+                Activity.RESULT_OK, null, null);
     }
 
     public static void setServiceAlarm(Context context, boolean isOn) {
