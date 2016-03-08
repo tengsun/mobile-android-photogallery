@@ -28,6 +28,7 @@ public class PollService extends IntentService {
 
     private static final String TAG = "PollService";
     private static final int POLL_INTERNAL = 1000 * 15;
+    public static final String PREF_IS_ALARM_ON = "isAlarmOn";
 
     public PollService() {
         super(TAG);
@@ -90,19 +91,23 @@ public class PollService extends IntentService {
         prefs.edit().putString(FlickrFetcher.PREF_LAST_RESULT_ID, resultId).commit();
     }
 
-    public static void setServiceAlarm(Context context, boolean shouldStart) {
+    public static void setServiceAlarm(Context context, boolean isOn) {
         Intent intent = new Intent(context, PollService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager)
                 context.getSystemService(Context.ALARM_SERVICE);
-        if (shouldStart) {
+        if (isOn) {
             alarmManager.setRepeating(AlarmManager.RTC,
                     System.currentTimeMillis(), POLL_INTERNAL, pi);
         } else {
             alarmManager.cancel(pi);
             pi.cancel();
         }
+
+        // set alarm status
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putBoolean(PollService.PREF_IS_ALARM_ON, isOn).commit();
     }
 
     public static boolean isServiceAlarmOn(Context context) {
